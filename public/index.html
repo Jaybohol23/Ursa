@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto React on Facebook  - Boost Your Posts! Modify By Ursa</title>
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .box-container {
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .form-container {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .input, .select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 100%;
+        }
+        .button {
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 16px;
+            text-align: center;
+        }
+        .result.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .result.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .counter {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .about {
+            margin-bottom: 40px;
+        }
+        .step {
+            margin-bottom: 40px;
+        }
+        .loader {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="box-container">
+            <h1 class="title">Auto React on Facebook - Boost Your Posts! Made by Ursa</h1>
+            <div class="about">
+                <h2>About Us</h2>
+                <p>We are dedicated to providing tools and solutions to enhance your social media experience. Our auto reaction tool helps you boost your Facebook posts with reactions.</p>
+            </div>
+            <div class="form-container">
+                <form id="reactForm">
+                    <div class="form-group">
+                        <label for="link">Post Link:</label>
+                        <input class="input" type="url" id="link" name="link" placeholder="Enter the link of your Facebook post" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="type">Reaction Type:</label>
+                        <div class="select">
+                            <select id="type" name="type" required>
+                                <option value="">Select the reaction type</option>
+                                <option value="LIKE">Like</option>
+                                <option value="WOW">Wow</option>
+                                <option value="SAD">Sad</option>
+                                <option value="ANGRY">Angry</option>
+                                <option value="CARE">Care</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cookie">Your Facebook Cookie:</label>
+                        <input class="input" type="text" id="cookie" name="cookie" placeholder="Enter your Facebook cookie" required>
+                        <p class="help">Instructions: Go to Facebook, log in to your account, press F12 or right-click and choose "Inspect", go to "Application" tab, find "Cookies" in the left sidebar, click on the Facebook domain, copy the "cookie" value and paste it here.</p>
+                    </div>
+                    <button class="button is-primary" type="submit">Submit</button>
+                    <div class="loader" id="loader"></div>
+                </form>
+            </div>
+            <div id="result" class="result" style="display: none;"></div>
+            <div id="counter" class="counter" style="display: none;"></div>
+            <div class="step">
+                <h2>Step by Step Guide</h2>
+                <ol>
+                    <li>Copy the link of your Facebook post that you want to boost with reactions.</li>
+                    <li>Select the type of reaction you want to boost (Like, Wow, Sad, Angry, Care).</li>
+                    <li>Get your Facebook cookie by following the instructions provided.</li>
+                    <li>Paste the link, select the reaction type, and enter your Facebook cookie in the respective fields above.</li>
+                    <li>Click the "Submit" button to boost your post with the selected reaction.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const reactForm = document.getElementById('reactForm');
+            const resultDiv = document.getElementById('result');
+            const counterDiv = document.getElementById('counter');
+            const loader = document.getElementById('loader');
+
+            let reactionCounts = {
+                LIKE: 0,
+                WOW: 0,
+                SAD: 0,
+                ANGRY: 0,
+                CARE: 0
+            };
+
+            reactForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                resultDiv.textContent = '';
+                resultDiv.style.display = 'none';
+                loader.style.display = 'block';
+
+                const link = document.getElementById('link').value.trim();
+                const type = document.getElementById('type').value;
+                const cookie = document.getElementById('cookie').value.trim();
+
+                if (!link || !type || !cookie) {
+                    showError('All fields are required.');
+                    loader.style.display = 'none';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/react?link=${encodeURIComponent(link)}&type=${type}&cookie=${encodeURIComponent(cookie)}`);
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showSuccess('Reaction posted successfully!');
+                        reactionCounts[type]++;
+                        updateCounter();
+                    } else {
+                        showError(data.error || 'An error occurred while posting the reaction.');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    showError('An error occurred while posting the reaction.');
+                } finally {
+                    loader.style.display = 'none';
+                }
+            });
+
+            function showSuccess(message) {
+                resultDiv.textContent = message;
+                resultDiv.classList.add('success');
+                resultDiv.classList.remove('error');
+                resultDiv.style.display = 'block';
+            }
+
+            function showError(message) {
+                resultDiv.textContent = message;
+                resultDiv.classList.add('error');
+                resultDiv.classList.remove('success');
+                resultDiv.style.display = 'block';
+            }
+
+            function updateCounter() {
+                counterDiv.style.display = 'block';
+                let counterHTML = '';
+                for (const [reaction, count] of Object.entries(reactionCounts)) {
+                    counterHTML += `<p>${reaction}: ${count}</p>`;
+                }
+                counterDiv.innerHTML = counterHTML;
+            }
+        });
+    </script>
+</body>
+</html>
